@@ -7,9 +7,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"  # Expose PostgreSQL port to host
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
   app:
     build:
       context: .
@@ -21,6 +22,18 @@ services:
     volumes:
       - .:/app
     command: ["python", "main.py"]
+
+  test:
+    build:
+      context: .
+    container_name: api_scraping_app_test
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+    command: ["python", "test_harness.py"]
 
 volumes:
   postgres_data:

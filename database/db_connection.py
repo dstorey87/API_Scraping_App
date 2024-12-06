@@ -1,5 +1,6 @@
 # database/db_connection.py
 
+import os
 import psycopg
 import logging
 import time
@@ -17,6 +18,9 @@ def get_db_connection(dbname=None, retries=3, delay=5):
     # Override the database name if dbname is provided
     if dbname:
         db_config["dbname"] = dbname
+
+    # Override the host if provided as an environment variable
+    db_config["host"] = os.getenv("POSTGRES_HOST", db_config["host"])
 
     for attempt in range(1, retries + 1):
         try:

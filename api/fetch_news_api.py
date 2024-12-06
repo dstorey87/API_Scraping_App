@@ -5,6 +5,8 @@ from requests.exceptions import RequestException, HTTPError, ConnectionError, Ti
 from config.api_config import NEWS_API_KEY
 import time
 
+keywords = ["AI", "technology", "Python"]
+
 def fetch_news(keywords, country="us", language="en", retries=3, delay=5):
     """Fetch news articles from NewsAPI, influenced by trending topics."""
     articles = []

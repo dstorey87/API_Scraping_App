@@ -13,6 +13,8 @@ def sanitize_keyword(keyword):
     """Remove special characters from keywords."""
     return re.sub(r'[^\w\s]', '', keyword)
 
+# pytrends_lib/trends_integration.py
+
 def fetch_trending_topics(keywords=None, retries=3, delay=5, batch_size=5):
     """Fetch trending data for given keywords using PyTrends."""
     pytrends = TrendReq(hl='en-US', tz=360)
