@@ -1,26 +1,30 @@
 # API Scraping Application
 
-This project is designed to scrape data from various APIs and store the results in a PostgreSQL database.
+This project is designed to scrape data from various APIs and store the results in a PostgreSQL database. It leverages trending data from Google Trends using PyTrends to influence the news articles fetched, ensuring the data remains relevant and timely.
 
 ## Features
 
-- Modular API integrations for better scalability and maintainability.
-- Centralized configuration for credentials and database connection settings.
-- Dockerized setup for easy deployment and environment consistency.
-- Integrated PyTrends support using GeneralMills/pytrends.
+- **Modular Architecture:** API integrations are modular for better scalability and maintainability.
+- **Centralized Configuration:** Manages credentials and database connection settings centrally using environment variables.
+- **Dockerized Setup:** Ensures easy deployment and environment consistency across different machines.
+- **Integrated PyTrends Support:** Utilizes GeneralMills/pytrends to fetch and leverage trending data from Google Trends, enhancing the relevance of the scraped data.
+- **Comprehensive Error Handling:** Implements robust error checking and handling across all modules to ensure reliability.
+- **Automated Testing:** Includes a detailed test harness to perform end-to-end testing of all functionalities.
 
 ## Prerequisites
 
-- Docker and Docker Compose installed
-- Python 3.10 or higher
+- **Docker and Docker Compose:** Ensure Docker is installed and properly configured on your machine.
+- **Python 3.10 or Higher:** Required for local development and testing.
+- **PostgreSQL Database:** The application stores scraped data in a PostgreSQL database.
 
 ## Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd API_Scraping_App
-   ```
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd API_Scraping_App
+```
 
 2. Set up your environment variables in the `.env` file.
 

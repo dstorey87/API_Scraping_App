@@ -1,3 +1,5 @@
-psycopg
+flask
 requests
+psycopg[binary]
 python-dotenv
+pytrends
