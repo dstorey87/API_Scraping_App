@@ -1,11 +1,14 @@
+# test_harness.py
+
 import unittest
-import warnings
 import logging
 from api.fetch_news_api import fetch_news
+from api.fetch_guardian_api import fetch_guardian_data
+from api.fetch_pytrends import fetch_trending_topics
+from api.fetch_reddit_data import fetch_reddit_data
 from database.db_connection import get_db_connection
 from database.insert_data import insert_news_articles
-from pytrends_lib.trends_integration import fetch_trending_topics
-from psycopg.errors import UniqueViolation
+from psycopg.errors import UniqueViolation  # type: ignore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,272 +16,102 @@ logger = logging.getLogger(__name__)
 
 class TestAPIModules(unittest.TestCase):
     """Test case for API modules."""
-
-    def test_fetch_trending_topics(self):
-        """Test fetching trending topics using PyTrends."""
-        # Suppress FutureWarning during the test
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=FutureWarning)
-            try:
-                # Fetch trending topics without providing keywords
-                trending_data = fetch_trending_topics()
-                # Check if the returned data is a list or a DataFrame
-                data_is_valid = isinstance(trending_data, list) or not trending_data.empty
-                # Assert that the data is valid
-                self.assertTrue(data_is_valid, "No trending data fetched")
-                logger.info("test_fetch_trending_topics passed.")
-            except Exception as e:
-                # Fail the test if an exception occurs
-                self.fail(f"Exception occurred while fetching trending topics: {e}")
-
+    
     def test_fetch_news(self):
-        """Test fetching news articles from NewsAPI influenced by trending topics."""
-        try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles using the fetch_news function
-            articles = fetch_news(keywords=test_keywords)
-            # Assert that the result is a list
-            self.assertIsInstance(articles, list, "Articles fetched are not in a list")
-            # Assert that the list is not empty
-            self.assertGreater(len(articles), 0, "No articles fetched")
-            logger.info("test_fetch_news passed.")
-        except Exception as e:
-            # Fail the test if an exception occurs
-            self.fail(f"Exception occurred while fetching news articles: {e}")
-
-    def test_insert_news_articles(self):
-        """Test inserting news articles into the database."""
-        connection = get_db_connection()
-        self.assertIsNotNone(connection, "Database connection should not be None")
-        try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles using the fetch_news function
-            articles = fetch_news(keywords=test_keywords)
-            # Insert news articles into the database
-            insert_news_articles(connection, articles)
-            # Additional assertions can be added here
-            logger.info("test_insert_news_articles passed.")
-        except Exception as e:
-            self.fail(f"Exception occurred while inserting articles: {e}")
-        finally:
-            if connection:
-                connection.close()
-
+        keywords = ['technology', 'science']
+        news = fetch_news(keywords)
+        self.assertIsInstance(news, list)
+        self.assertGreater(len(news), 0)
+        logger.info("fetch_news test passed.")
+    
+    def test_fetch_guardian_data(self):
+        guardian_data = fetch_guardian_data()
+        self.assertIsInstance(guardian_data, list)
+        self.assertGreater(len(guardian_data), 0)
+        logger.info("fetch_guardian_data test passed.")
+    
+    def test_fetch_trending_topics(self):
+        trending = fetch_trending_topics()
+        self.assertIsInstance(trending, list)
+        self.assertGreater(len(trending), 0)
+        logger.info("fetch_trending_topics test passed.")
+    
+    def test_fetch_reddit_data(self):
+        reddit_data = fetch_reddit_data()
+        self.assertIsInstance(reddit_data, list)
+        self.assertGreater(len(reddit_data), 0)
+        logger.info("fetch_reddit_data test passed.")
 
 class TestDatabaseModules(unittest.TestCase):
     """Test case for database modules."""
-
-    def setUp(self):
-        """Set up resources before each test."""
-        # Establish a database connection
-        self.connection = get_db_connection()
-        # Fail the test if the connection is None
-        if self.connection is None:
-            self.fail("Failed to connect to the database")
-
-    def tearDown(self):
-        """Clean up resources after each test."""
-        # Close the database connection if it's open
-        if self.connection:
-            self.connection.close()
-
+    
     def test_db_connection(self):
-        """Test that the database connection is successful."""
-        # Assert that the connection is not None
-        self.assertIsNotNone(self.connection, "Database connection failed")
-
+        connection = get_db_connection()
+        self.assertIsNotNone(connection)
+        connection.close()
+        logger.info("get_db_connection test passed.")
+    
     def test_insert_news_articles(self):
-        """Test inserting news articles into the database."""
+        connection = get_db_connection()
+        self.assertIsNotNone(connection)
         try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles
-            articles = fetch_news(keywords=test_keywords)
-            # Insert news articles into the database
-            insert_news_articles(self.connection, articles)
-            # If no exception is raised, the test passes
-            self.assertTrue(True, "Articles inserted successfully")
-        except UniqueViolation as uv:
-            # Handle unique constraint violations (e.g., duplicate URLs)
-            self.fail(f"UniqueViolation error occurred: {uv}")
+            with connection:
+                with connection.cursor() as cursor:
+                    sample_article = {
+                        "source": "Guardian",
+                        "author": "John Doe",
+                        "title": "Sample News",
+                        "description": "This is a sample news article.",
+                        "url": "https://example.com/sample-news",
+                        "published_at": "2024-12-07 12:00:00"
+                    }
+                    insert_news_articles(connection, [sample_article])
+                    cursor.execute("SELECT * FROM api_data.news_articles WHERE url = %s", ("https://example.com/sample-news",))
+                    result = cursor.fetchone()
+                    self.assertIsNotNone(result)
+            logger.info("insert_news_articles test passed.")
         except Exception as e:
-            # Fail the test if any other exception occurs
-            self.fail(f"Failed to insert articles: {e}")
-
+            self.fail(f"Exception occurred: {e}")
+        finally:
+            connection.close()
 
 class TestEndToEnd(unittest.TestCase):
     """End-to-End test case for the entire data flow."""
-
-    def test_full_data_flow(self):
-        # Obtain or define test keywords
-        test_keywords = ["test", "api", "news"]
+    
+    def test_full_pipeline(self):
+        trending_topics = fetch_trending_topics()
+        self.assertIsInstance(trending_topics, list)
+        self.assertGreater(len(trending_topics), 0)
+        
+        keywords = trending_topics[:5]
+        news_articles = fetch_news(keywords)
+        self.assertIsInstance(news_articles, list)
+        self.assertGreater(len(news_articles), 0)
+        
+        guardian_articles = fetch_guardian_data()
+        self.assertIsInstance(guardian_articles, list)
+        self.assertGreater(len(guardian_articles), 0)
+        
+        reddit_articles = fetch_reddit_data()
+        self.assertIsInstance(reddit_articles, list)
+        self.assertGreater(len(reddit_articles), 0)
+        
+        all_articles = news_articles + guardian_articles + reddit_articles
+        connection = get_db_connection()
+        self.assertIsNotNone(connection, "Failed to establish database connection.")
+        
         try:
-            # Fetch trending topics
-            trending_data = fetch_trending_topics()
-            self.assertTrue(
-                isinstance(trending_data, list) or not trending_data.empty,
-                "Trending data is invalid"
-            )
-
-            # Fetch news articles influenced by trending topics
-            articles = fetch_news(keywords=test_keywords)
-            self.assertIsInstance(articles, list, "Articles fetched are not in a list")
-            self.assertGreater(len(articles), 0, "No articles fetched")
-
-            # Establish a database connection
-            connection = get_db_connection()
-            self.assertIsNotNone(connection, "Failed to connect to the database")
-
-            try:
-                # Insert news articles into the database
-                insert_news_articles(connection, articles)
-                self.assertTrue(True, "Articles inserted successfully")
-            finally:
-                # Close the database connection
-                connection.close()
+            with connection:
+                insert_news_articles(connection, all_articles)
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT COUNT(*) FROM api_data.news_articles")
+                    count = cursor.fetchone()[0]
+                    self.assertGreater(count, 0)
+            logger.info("Full pipeline test passed.")
         except Exception as e:
-            # Fail the test if any exception occurs during the full data flow
-            self.fail(f"End-to-End data flow test failed: {e}")
-
+            self.fail(f"Exception occurred during full pipeline test: {e}")
+        finally:
+            connection.close()
 
 if __name__ == "__main__":
-    # Run the test cases
     unittest.main()
-
-# database/db_connection.py
-
-import os
-import psycopg
-import logging
-import time
-from config.db_config import DB_CONFIG
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def get_db_connection(dbname=None, retries=3, delay=5):
-    """Establish a connection to the PostgreSQL database."""
-    # Create a copy of the DB_CONFIG to avoid modifying the original
-    db_config = DB_CONFIG.copy()
-    
-    # Override the database name if dbname is provided
-    if dbname:
-        db_config["dbname"] = dbname
-
-    # Override the host if provided as an environment variable
-    db_config["host"] = os.getenv("POSTGRES_HOST", db_config["host"])
-
-    for attempt in range(1, retries + 1):
-        try:
-            logger.info(f"Attempt {attempt}: Connecting to the database at {db_config['host']}:{db_config['port']}")
-            connection = psycopg.connect(**db_config)
-            logger.info("Database connection established successfully.")
-            return connection
-        except psycopg.OperationalError as e:
-            logger.error(f"Database connection error: {e}")
-            if attempt < retries:
-                logger.info(f"Retrying in {delay} seconds...")
-                time.sleep(delay)
-            else:
-                logger.error("Max retries reached. Could not connect to the database.")
-                return None
-
-# test_harness.py
-
-class TestDatabaseModules(unittest.TestCase):
-    """Test case for database modules."""
-
-    def setUp(self):
-        """Set up resources before each test."""
-        # Establish a database connection
-        self.connection = get_db_connection()
-        # Fail the test if the connection is None
-        if self.connection is None:
-            self.fail("Failed to connect to the database")
-
-    def tearDown(self):
-        """Clean up resources after each test."""
-        # Close the database connection if it's open
-        if self.connection:
-            self.connection.close()
-
-    def test_db_connection(self):
-        """Test that the database connection is successful."""
-        # Assert that the connection is not None
-        self.assertIsNotNone(self.connection, "Database connection failed")
-
-    def test_insert_news_articles(self):
-        """Test inserting news articles into the database."""
-        try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles
-            articles = fetch_news(keywords=test_keywords)
-            # Insert news articles into the database
-            insert_news_articles(self.connection, articles)
-            # If no exception is raised, the test passes
-            self.assertTrue(True, "Articles inserted successfully")
-        except UniqueViolation as uv:
-            # Handle unique constraint violations (e.g., duplicate URLs)
-            self.fail(f"UniqueViolation error occurred: {uv}")
-        except Exception as e:
-            # Fail the test if any other exception occurs
-            self.fail(f"Failed to insert articles: {e}")
-
-class TestAPIModules(unittest.TestCase):
-    """Test case for API modules."""
-
-    def test_fetch_trending_topics(self):
-        """Test fetching trending topics using PyTrends."""
-        # Suppress FutureWarning during the test
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=FutureWarning)
-            try:
-                # Fetch trending topics without providing keywords
-                trending_data = fetch_trending_topics()
-                # Check if the returned data is a list or a DataFrame
-                data_is_valid = isinstance(trending_data, list) or not trending_data.empty
-                # Assert that the data is valid
-                self.assertTrue(data_is_valid, "No trending data fetched")
-                logger.info("test_fetch_trending_topics passed.")
-            except Exception as e:
-                # Fail the test if an exception occurs
-                self.fail(f"Exception occurred while fetching trending topics: {e}")
-
-    def test_fetch_news(self):
-        """Test fetching news articles from NewsAPI influenced by trending topics."""
-        try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles using the fetch_news function
-            articles = fetch_news(keywords=test_keywords)
-            # Assert that the result is a list
-            self.assertIsInstance(articles, list, "Articles fetched are not in a list")
-            # Assert that the list is not empty
-            self.assertGreater(len(articles), 0, "No articles fetched")
-            logger.info("test_fetch_news passed.")
-        except Exception as e:
-            # Fail the test if an exception occurs
-            self.fail(f"Exception occurred while fetching news articles: {e}")
-
-    def test_insert_news_articles(self):
-        """Test inserting news articles into the database."""
-        connection = get_db_connection()
-        self.assertIsNotNone(connection, "Database connection should not be None")
-        try:
-            # Define test keywords
-            test_keywords = ["test", "api", "news"]
-            # Fetch news articles using the fetch_news function
-            articles = fetch_news(keywords=test_keywords)
-            # Insert news articles into the database
-            insert_news_articles(connection, articles)
-            # Additional assertions can be added here
-            logger.info("test_insert_news_articles passed.")
-        except Exception as e:
-            self.fail(f"Exception occurred while inserting articles: {e}")
-        finally:
-            if connection:
-                connection.close()

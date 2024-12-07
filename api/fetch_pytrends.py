@@ -14,7 +14,3 @@ def fetch_trending_topics():
     trending_searches = trending_searches_df[0].tolist()
     logger.info(f"Fetched trending searches: {trending_searches}")
     return trending_searches
-
-if __name__ == "__main__":
-    trending_topics = fetch_trending_topics()
-    print(f"Trending topics: {trending_topics}")

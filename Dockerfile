@@ -1,20 +1,23 @@
-# Dockerfile for API Scraping App
-FROM python:3.10-slim
+# Dockerfile
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libpq-dev gcc && \
-    rm -rf /var/lib/apt/lists/*
+# Stage 1: Build dependencies
+FROM python:3.11-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements and install dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --user -r requirements.txt
 
-# Copy application code
 COPY . .
 
-# Default command
+# Stage 2: Build the production image
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+COPY . .
+
 CMD ["python", "main.py"]

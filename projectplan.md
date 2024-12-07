@@ -87,4 +87,3 @@ This document outlines the steps necessary to complete the API Scraping Applicat
 - Review current `main.py` and existing integrations for refactoring opportunities.
 - Start with implementing the Reddit API integration.
 - Update the `project_plan.md` weekly with completed milestones and new priorities.
-

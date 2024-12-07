@@ -28,6 +28,9 @@ The **API Scraping App** simplifies data collection, processing, and storage by 
 - **Integrated PyTrends Support:** Utilizes GeneralMills/pytrends to fetch and leverage trending data from Google Trends, enhancing the relevance of the scraped data.
 - **Comprehensive Error Handling:** Implements robust error checking and handling across all modules to ensure reliability.
 - **Automated Testing:** Includes a detailed test harness to perform end-to-end testing of all functionalities.
+- **Web Dashboard:** Provides a Flask-based web interface for data visualization and admin controls.
+- **CI/CD Pipeline:** Automated with GitHub Actions for testing, linting, and Docker image building.
+- **Scalability:** Configured for horizontal scaling using Docker Swarm.
 
 ---
 
@@ -51,13 +54,12 @@ cd API_Scraping_App
 ## Setup and Installation
 
 ### Prerequisites
-- **Docker and Docker Compose:** Ensure Docker is installed and properly configured on your machine.
-- **Python 3.10 or Higher:** Required for local development and testing.
-- **PostgreSQL Database:** The application stores scraped data in a PostgreSQL database.
+- Python 3.10+
+- Docker and Docker Compose
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the Repository:**
    ```bash
    git clone https://github.com/dstorey87/API_Scraping_App.git
    cd API_Scraping_App
@@ -133,7 +135,7 @@ API_Scraping_App/
 ├── tests/                    # Unit and integration tests
 │   ├── __init__.py
 │   ├── test_data_ingestion.py
-│   ├── test_data_processing.py
+│   ��── test_data_processing.py
 │   └── test_api_client.py
 │
 ├── .gitignore
