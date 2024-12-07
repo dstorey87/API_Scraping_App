@@ -11,6 +11,7 @@ This project is designed to scrape data from various APIs and store the results 
 - [Future Development Plans](#future-development-plans)
 - [Contributing](#contributing)
 - [License](#license)
+- [Support](#support)
 
 ---
 
@@ -34,30 +35,13 @@ The **API Scraping App** simplifies data collection, processing, and storage by 
 
 ---
 
-## Prerequisites
-
-- **Docker and Docker Compose:** Ensure Docker is installed and properly configured on your machine.
-- **Python 3.10 or Higher:** Required for local development and testing.
-- **PostgreSQL Database:** The application stores scraped data in a PostgreSQL database.
-
-## Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd API_Scraping_App
-```
-
----
-
 ## Setup and Installation
 
 ### Prerequisites
 - Python 3.10+
 - Docker and Docker Compose
 
-### Installation
+### Getting Started
 
 1. **Clone the Repository:**
    ```bash
@@ -185,3 +169,7 @@ Contributions are welcome! Please follow these steps to contribute:
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
+
+## Support
+
+For any issues or support, please open an issue on the GitHub repository or contact the maintainer.
