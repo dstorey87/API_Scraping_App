@@ -119,7 +119,7 @@ API_Scraping_App/
 ├── tests/                    # Unit and integration tests
 │   ├── __init__.py
 │   ├── test_data_ingestion.py
-│   ��── test_data_processing.py
+│   ├── test_data_processing.py
 │   └── test_api_client.py
 │
 ├── .gitignore
