@@ -16,12 +16,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def fetch_guardian_data():
-    """Fetch data from the Guardian API."""
+    """
+    Fetch articles from Guardian API with proper error handling.
+    
+    Returns:
+        list: List of articles or empty list on error
+    """
     try:
         connection = get_db_connection()
         if connection is None:
             logger.error("Database connection failed.")
-            return None
+            return []
         
         url = "https://content.guardianapis.com/search"
         params = {
@@ -54,8 +59,8 @@ def fetch_guardian_data():
     except requests.HTTPError as http_err:
         logger.error(f"HTTP error occurred: {http_err}")
     except Exception as e:
-        logger.error(f"Error fetching Guardian data: {e}")
-    return None
+        logger.error(f"Guardian API error: {str(e)}")
+        return []  # Return empty list instead of None
 
 if __name__ == "__main__":
     fetch_guardian_data()

@@ -14,38 +14,41 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def insert_news_articles(connection, articles):
-    """Insert news articles into the database."""
+    """Insert news articles with data validation."""
+    if not connection:
+        logger.error("No database connection available")
+        return False
+        
     try:
         with connection.cursor() as cursor:
             for article in articles:
-                required_fields = ["source", "author", "title", "description", "url", "published_at"]
-                if all(field in article for field in required_fields):
-                    # Ensure 'published_at' is a datetime object
-                    if isinstance(article["published_at"], str):
-                        article["published_at"] = datetime.fromisoformat(article["published_at"])
-                    
-                    cursor.execute(
-                        """
-                        INSERT INTO api_data.news_articles (source, author, title, description, url, published_at)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (url) DO NOTHING
-                        """,
-                        (
-                            article["source"],
-                            article["author"],
-                            article["title"],
-                            article["description"],
-                            article["url"],
-                            article["published_at"]
-                        )
-                    )
-                else:
-                    logger.warning("News article missing required fields. Skipping.")
+                if not all(article.get(field) for field in ['title', 'url']):
+                    logger.warning(f"Skipping article with missing required fields: {article}")
+                    continue
+                
+                # Prepare values as tuple instead of dict
+                values = (
+                    article.get('source', ''),
+                    article.get('author', ''),
+                    article['title'],
+                    article.get('description', ''),
+                    article['url'],
+                    article.get('published_at')
+                )
+                
+                cursor.execute("""
+                    INSERT INTO api_data.news_articles 
+                    (source, author, title, description, url, published_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (url) DO NOTHING
+                """, values)
+                
         connection.commit()
-        logger.info("All news articles inserted successfully.")
+        return True
     except Exception as e:
+        logger.error(f"Error inserting articles: {str(e)}")
         connection.rollback()
-        logger.error(f"Error inserting news articles: {e}")
+        return False
 
 def insert_guardian_articles(connection, articles):
     """Insert Guardian articles into the database."""
