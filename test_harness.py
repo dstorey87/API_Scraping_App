@@ -40,13 +40,12 @@ class DatabaseConnection:
         }
 
         try:
-            logger.info(f"Connecting to database at {connection_params['host']}:{connection_params['port']}")
             self.connection = psycopg.connect(**connection_params)
             return self.connection
         except Exception as e:
             logger.error(f"Database connection error: {str(e)}")
             return None
-            
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Close database connection."""
         if self.connection:
@@ -56,6 +55,7 @@ class DatabaseConnection:
                 else:
                     self.connection.rollback()
                 self.connection.close()
+                self.connection = None
             except Exception as e:
                 logger.error(f"Error closing connection: {str(e)}")
 
@@ -76,15 +76,16 @@ class BaseTestCase(unittest.TestCase):
     
     def setUp(self):
         """Setup before each test."""
+        self.db = None
+        self.connection = None
         self.db = DatabaseConnection()
         self.connection = self.db.__enter__()
-        if not self.connection and 'db_' in self._testMethodName:
-            self.skipTest("Database connection not available")
-            
+        
     def tearDown(self):
         """Cleanup after each test."""
-        if hasattr(self, 'db'):
+        if self.db:
             self.db.__exit__(None, None, None)
+            self.connection = None
 
 class TestAPIModules(BaseTestCase):
     """Test case for API modules."""
@@ -278,13 +279,25 @@ class TestDatabaseModules(BaseTestCase):
             if connection:
                 connection.close()
 
+    def test_db_operation(self):
+        """Test database operation with proper connection handling."""
+        with DatabaseConnection() as conn:
+            if not conn:
+                self.fail("Could not establish database connection")
+            
+            with conn.cursor() as cursor:
+                # Perform database operations
+                cursor.execute("SELECT 1")
+                result = cursor.fetchone()
+                self.assertEqual(result[0], 1)
+
 class TestEndToEnd(BaseTestCase):
     """End-to-End test case for the entire data flow."""
     
     def test_full_pipeline(self):
         """Test the complete data pipeline."""
         try:
-            # Get trending topics
+            # Get trending topics and verify
             trending_topics = fetch_trending_topics()
             self.assertIsInstance(trending_topics, list)
             self.assertGreater(len(trending_topics), 0)
@@ -300,37 +313,30 @@ class TestEndToEnd(BaseTestCase):
             self.assertIsInstance(guardian_articles, list)
             self.assertIsInstance(reddit_articles, list)
             
-            # Insert articles using DatabaseConnection context manager
-            with DatabaseConnection() as connection:
-                if not connection:
+            # Insert articles using context manager
+            with DatabaseConnection() as conn:
+                if not conn:
                     self.fail("Could not establish database connection")
                     
-                # Process and insert articles
-                valid_articles = [
-                    (
-                        str(article.get('source', '')),
-                        str(article.get('author', '')),
-                        str(article.get('title', '')),
-                        str(article.get('description', '')),
-                        str(article.get('url', '')),
-                        article.get('published_at')
-                    )
-                    for article in news_articles 
-                    if article.get('title') and article.get('url')
-                ]
-                
-                if valid_articles:
-                    with connection.cursor() as cursor:
-                        cursor.executemany("""
-                            INSERT INTO api_data.news_articles 
-                            (source, author, title, description, url, published_at)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (url) DO NOTHING
-                        """, valid_articles)
-                    connection.commit()
-                
-                logger.info("Full pipeline test passed.")
-                
+                with conn.cursor() as cursor:
+                    for article in news_articles:
+                        if article.get('title') and article.get('url'):
+                            cursor.execute("""
+                                INSERT INTO api_data.news_articles 
+                                (source, author, title, description, url, published_at)
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                ON CONFLICT (url) DO NOTHING
+                            """, (
+                                str(article.get('source', '')),
+                                str(article.get('author', '')),
+                                str(article.get('title', '')),
+                                str(article.get('description', '')),
+                                str(article.get('url', '')),
+                                article.get('published_at')
+                            ))
+                            
+            logger.info("Full pipeline test passed.")
+            
         except Exception as e:
             self.fail(f"Exception during pipeline test: {e}")
 

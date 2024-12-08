@@ -39,7 +39,13 @@ class DatabaseConnection:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Close database connection."""
         if self.connection:
-            self.connection.close()
+            try:
+                if exc_type is None:
+                    self.connection.commit()
+                self.connection.close()
+                self.connection = None
+            except Exception as e:
+                logger.error(f"Error closing connection: {str(e)}")
             
 def get_db_connection():
     """Get database connection using context manager."""

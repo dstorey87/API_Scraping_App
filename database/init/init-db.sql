@@ -4,8 +4,8 @@ CREATE SCHEMA IF NOT EXISTS api_data;
 -- Create tables
 CREATE TABLE IF NOT EXISTS api_data.news_articles (
     id SERIAL PRIMARY KEY,
-    source VARCHAR(255),
-    author VARCHAR(255),
+    source TEXT,
+    author TEXT,
     title TEXT NOT NULL,
     description TEXT,
     url TEXT UNIQUE NOT NULL,
@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS api_data.reddit_articles (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     url TEXT UNIQUE NOT NULL,
-    author VARCHAR(255),
-    subreddit VARCHAR(255),
     score INTEGER,
     created_at TIMESTAMP
 );
@@ -48,5 +46,5 @@ CREATE TABLE IF NOT EXISTS api_data.logs (
 );
 
 -- Grant permissions
-GRANT ALL ON SCHEMA api_data TO postgres;
-GRANT ALL ON ALL TABLES IN SCHEMA api_data TO postgres;
+GRANT ALL ON SCHEMA api_data TO admin;
+GRANT ALL ON ALL TABLES IN SCHEMA api_data TO admin;
