@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS api_data.guardian_articles (
 
 CREATE TABLE IF NOT EXISTS api_data.trending_topics (
     id SERIAL PRIMARY KEY,
-    topic TEXT NOT NULL,
+    topic TEXT NOT NULL UNIQUE,  -- Add UNIQUE constraint
     score INTEGER,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
