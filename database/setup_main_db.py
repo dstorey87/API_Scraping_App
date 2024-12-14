@@ -2,7 +2,7 @@
 
 from database.db_connection import get_db_connection
 from config.db_config import DB_CONFIG, ADMIN_DB_CONFIG
-
+import os
 import psycopg
 from psycopg import sql
 import logging
@@ -90,7 +90,7 @@ def setup_schema(connection):
     """Create the necessary database schema."""
     try:
         cursor = connection.cursor()
-        
+
         # Example schema creation
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS guardian_articles (
@@ -100,7 +100,7 @@ def setup_schema(connection):
             publication_date TIMESTAMP NOT NULL
         );
         """)
-        
+
         connection.commit()
         cursor.close()
         print("Schema setup completed successfully.")
@@ -108,30 +108,76 @@ def setup_schema(connection):
         print(f"Error setting up schema: {error}")
         connection.rollback()
 
+def check_test_data_exists(cursor):
+    cursor.execute("SELECT COUNT(*) FROM articles WHERE source = 'Test Source'")
+    return cursor.fetchone()[0] > 0
+
 def setup_database():
-    """Set up the database, schema, and tables."""
-    # Connect to the admin database using ADMIN_DB_CONFIG
-    connection = get_db_connection(dbname=ADMIN_DB_CONFIG["dbname"])
-    if connection is None:
-        logger.error("Failed to connect to the admin database.")
-        return
+    # First connect to admin database to create new DB if needed
+    admin_conn = get_db_connection(dbname=os.getenv("POSTGRES_ADMIN_DB"))
+    admin_conn.autocommit = True
+    cursor = admin_conn.cursor()
 
-    # Create the target database if it doesn't exist
-    create_database_if_not_exists(connection, DB_CONFIG["dbname"])
-    connection.close()
+    try:
+        # Create main database if it doesn't exist
+        main_db = os.getenv("POSTGRES_DB")
+        cursor.execute(f"SELECT 1 FROM pg_database WHERE datname = '{main_db}'")
+        if not cursor.fetchone():
+            cursor.execute(f"CREATE DATABASE {main_db}")
+            logger.info(f"Created database {main_db}")
+    finally:
+        cursor.close()
+        admin_conn.close()
 
-    # Connect to the target database
-    connection = get_db_connection()
-    if connection is None:
-        logger.error("Failed to connect to the target database.")
-        return
+    # Now connect to main database to create tables
+    main_conn = get_db_connection()
+    cursor = main_conn.cursor()
 
-    # Create schema and tables
-    create_schema_if_not_exists(connection, "api_data")
-    create_news_articles_table(connection)
-    alter_news_articles_table(connection)
-    setup_schema(connection)
-    connection.close()
+    try:
+        # Create your tables here
+        create_tables_sql = """
+        CREATE TABLE IF NOT EXISTS articles (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            content TEXT,
+            source VARCHAR(50),
+            published_date TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS guardian_articles (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            url TEXT NOT NULL,
+            publication_date TIMESTAMP NOT NULL
+        );
+        """
+        cursor.execute(create_tables_sql)
+        main_conn.commit()
+        logger.info("Database tables created successfully")
+
+        # Insert test data if it doesn't exist
+        if not check_test_data_exists(cursor):
+            cursor.execute("""
+                INSERT INTO articles (title, content, source)
+                VALUES ('Test Title', 'Test Content', 'Test Source');
+            """)
+
+            cursor.execute("""
+                INSERT INTO guardian_articles (title, url, publication_date)
+                VALUES (
+                    'Guardian Test',
+                    'https://www.theguardian.com/test-article',
+                    CURRENT_TIMESTAMP
+                );
+            """)
+            main_conn.commit()
+            logger.info("Test data inserted successfully")
+
+    finally:
+        cursor.close()
+        main_conn.close()
+        logger.info("Database and schema setup completed successfully.")
 
 if __name__ == "__main__":
     setup_database()

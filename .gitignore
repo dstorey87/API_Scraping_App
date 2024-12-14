@@ -1,6 +1,7 @@
 # Python
 *.pyc
 __pycache__/
+__pycache__/
 
 # Environment variables
 .env
@@ -35,6 +36,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+pytorch/
+cuda/
 
 # Installer logs
 pip-log.txt
@@ -74,10 +77,19 @@ docs/_build/
 target/
 
 # IDEs and editors
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
 .idea/
 *.sublime-project
 *.sublime-workspace
 
 # MacOS
 .DS_Store
+
+# Model cache
+model_cache/
+test_model_cache/
+.pytest_cache/
+/test_model_cache
+/test_cache/

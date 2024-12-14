@@ -1,0 +1,9 @@
+# ML dependencies
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.1.0+cu118
+torchvision==0.16.0+cu118
+torchaudio==2.1.0+cu118
+transformers>=4.31.0
+accelerate>=0.21.0
+scipy>=1.11.3
+huggingface_hub>=0.19.4

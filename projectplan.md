@@ -1,11 +1,43 @@
-# Project Plan for API Scraping Application
+# Project Plan for Local LLM Integration with LangChain
 
 ## Overview
 This document outlines the steps necessary to complete the API Scraping Application. The project aims to scrape data from various APIs, process the results, and store them in a PostgreSQL database. The application leverages Google Trends data to guide content relevance. The plan is divided into phases to facilitate modular, incremental development and deployment.
 
 ## Phase 1: Core Functionality Implementation
 
-### 1. API Integrations
+### 1. LangChain Integration with Local LLMs
+- **Base Setup**: Implement core LangChain functionality in the `o1_langchain_integration` directory.
+  - **Implementation**: 
+    - Set up local LLM models using PyTorch
+    - Configure LangChain for local model usage
+    - Implement basic chain types with local models
+  - **Status**: In Progress
+
+### 2. Service Layer
+- **LangChain Service**: Create modular service layer in `langchain_service` directory.
+  - **Implementation**: 
+    - Set up service structure for different chain types
+    - Implement CUDA acceleration support
+    - Add error handling and logging
+  - **Status**: Pending
+
+### 3. AI Workers
+- **Worker Implementation**: Create specialized AI workers in `ai_workers` directory.
+  - **Implementation**: 
+    - Set up worker queue system for distributed model inference
+    - Implement GPU-based task distribution
+    - Add monitoring and logging
+  - **Status**: Pending
+
+### 4. CUDA Integration
+- **GPU Acceleration**: Optimize LLM performance using CUDA.
+  - **Implementation**:
+    - Configure CUDA environment ([cuda.ps1](cuda.ps1))
+    - Set up PyTorch with CUDA support
+    - Implement model quantization
+  - **Status**: In Progress
+
+### 4. API Integrations
 - **Reddit Integration**: Extend the current API capabilities by integrating with the Reddit API. Focus on scraping trending topics from relevant subreddits.
   - **Implementation**: 
     - Created `fetch_reddit_data.py` to collect and structure Reddit data.
@@ -27,7 +59,7 @@ This document outlines the steps necessary to complete the API Scraping Applicat
     - Stored trending topics in the PostgreSQL database for historical analysis.
   - **Status**: **Complete**
 
-### 2. Database Improvements
+### 5. Database Improvements
 - **Database Design Review**: Refactor the database schema to accommodate new API sources.
   - **Implementation**: 
     - Created tables for `reddit_articles`, `guardian_articles`, and other relevant data sources.

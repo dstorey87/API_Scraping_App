@@ -118,3 +118,27 @@ This guide provides instructions for GitHub Copilot to automate coding tasks for
 ## Conclusion
 This guide is intended to ensure Copilot can effectively contribute to each phase of development. Follow the structured steps, keep the implementation aligned with our goals, and log progress regularly to ensure quality and consistency. Regularly update this guide as new features and phases are introduced.
 
+# GitHub Copilot Guide for LangChain Integration
+
+## Phase 1: Core Implementation
+
+### 1. LangChain Setup
+- **File Creation**: Set up core files in `o1_langchain_integration/`
+- **Goal**: Implement basic LangChain functionality
+- **Instructions**:
+  - Create base chain types
+  - Set up OpenAI integration
+  - Implement proper error handling
+  - Add logging and monitoring
+
+### 2. Service Layer Implementation
+- **File Creation**: Develop services in `langchain_service/`
+- **Goal**: Create modular service layer
+- **Instructions**:
+  - Implement service classes for different chain types
+  - Add connection management
+  - Set up error handling and retries
+
+[Rest of structure remains similar but focused on LangChain...]
+
+## 3. [GitHubCopilot.md](GitHubCopilot.md) Updates:

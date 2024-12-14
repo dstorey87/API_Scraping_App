@@ -1,6 +1,6 @@
-# API Scraping Application
+# Local LLM Integration with LangChain
 
-This project is designed to scrape data from various APIs and store the results in a PostgreSQL database. It leverages trending data from Google Trends using PyTrends to influence the news articles fetched, ensuring the data remains relevant and timely.
+This project implements LangChain functionality with local Large Language Models (LLMs) using PyTorch and CUDA acceleration.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -17,36 +17,34 @@ This project is designed to scrape data from various APIs and store the results 
 
 ## Overview
 
-The **API Scraping App** simplifies data collection, processing, and storage by interfacing with APIs such as Google Trends, Reddit, and more. Its modular design ensures scalability, allowing easy integration of additional APIs and data pipelines.
+The **LangChain Integration Application** simplifies the development of AI-powered applications by integrating LangChain functionality with various AI models and chain types. Its modular design ensures scalability, allowing easy integration of additional AI models and chain types.
 
 ---
 
 ## Features
 
-- **Modular Architecture:** API integrations are modular for better scalability and maintainability.
-- **Centralized Configuration:** Manages credentials and database connection settings centrally using environment variables.
-- **Dockerized Setup:** Ensures easy deployment and environment consistency across different machines.
-- **Integrated PyTrends Support:** Utilizes GeneralMills/pytrends to fetch and leverage trending data from Google Trends, enhancing the relevance of the scraped data.
-- **Comprehensive Error Handling:** Implements robust error checking and handling across all modules to ensure reliability.
-- **Automated Testing:** Includes a detailed test harness to perform end-to-end testing of all functionalities.
-- **Web Dashboard:** Provides a Flask-based web interface for data visualization and admin controls.
-- **CI/CD Pipeline:** Automated with GitHub Actions for testing, linting, and Docker image building.
-- **Scalability:** Configured for horizontal scaling using Docker Swarm.
+- **Local LLM Integration:** Run models locally with PyTorch
+- **CUDA Acceleration:** GPU-optimized inference
+- **Modular Architecture:** Separate services for different chain types
+- **Worker System:** Distributed task processing for AI operations
+- **Testing Framework:** Complete test coverage
 
 ---
 
 ## Setup and Installation
 
 ### Prerequisites
-- Python 3.10+
-- Docker and Docker Compose
+- Python 3.11+
+- CUDA capable GPU
+- PyTorch with CUDA support
+- Virtual Environment
 
 ### Getting Started
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/dstorey87/API_Scraping_App.git
-   cd API_Scraping_App
+   git clone https://github.com/dstorey87/LangChain_Integration_App.git
+   cd LangChain_Integration_App
    ```
 
 2. Install dependencies:
@@ -61,13 +59,7 @@ The **API Scraping App** simplifies data collection, processing, and storage by 
      ```
    - Update `.env` with your API keys and database credentials:
      ```
-     POSTGRES_DB=api_scraping
-     POSTGRES_USER=admin
-     POSTGRES_PASSWORD=strongpassword
-     POSTGRES_HOST=db
-     POSTGRES_PORT=5432
-     API_URL=https://api.example.com
-     API_KEY=your_api_key
+     OPENAI_API_KEY=your_openai_api_key
      ```
 
 4. Run the application:
@@ -101,39 +93,33 @@ The **API Scraping App** simplifies data collection, processing, and storage by 
 ## Directory Structure
 
 ```
-API_Scraping_App/
-│
-├── data/                     # Data storage
-│   ├── raw/                  # Raw unprocessed data
-│   └── processed/            # Processed and cleaned data
-│
-├── notebooks/                # Jupyter notebooks for analysis
-│   └── analysis.ipynb
-│
-├── src/                      # Source code
-│   ├── __init__.py
-│   ├── data_ingestion.py     # Handles data fetching from APIs
-│   ├── data_processing.py    # Cleans and processes data
-│   └── api_client.py         # Manages API interactions
-│
-├── tests/                    # Unit and integration tests
-│   ├── __init__.py
-│   ├── test_data_ingestion.py
-│   ├── test_data_processing.py
-│   └── test_api_client.py
-│
-├── .gitignore
-├── README.md                 # Project documentation
-├── requirements.txt          # Dependencies
-└── setup.py                  # Project setup script
+project/
+├── ai_workers/                 # Distributed worker system
+├── api/                        # API functionalities
+├── config/                     # Configuration files
+├── cuda/                       # CUDA-related functionalities
+├── database/                   # Database schemas and migrations
+├── langchain_service/          # Service layer for LLMs
+├── pytorch/                    # PyTorch models and scripts
+├── pytrends_lib/               # Library for Google Trends data
+├── pytrends_tool/              # Tool for interacting with pytrends
+├── services/                   # Background services and workers
+├── utils/                      # Utility scripts and helper functions
+├── web/                        # Web interface code
+│   └── interface.py            # Flask web application
+├── templates/                  # HTML templates
+│   └── index.html              # Main dashboard template
+├── static/                     # Static files
+│   └── reports/                # Generated reports
+└── tests/                      # Test suite
 ```
 
 ---
 
 ## Future Development Plans
 
-- **Expand API Support:**
-  - Add more APIs such as Twitter, Facebook, and news aggregators.
+- **Expand AI Model Support:**
+  - Add more AI models such as GPT-4, BERT, and other NLP models.
   - Implement OAuth2 for APIs requiring advanced authentication.
 
 - **Data Visualization:**

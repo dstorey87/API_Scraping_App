@@ -17,7 +17,7 @@ class DatabaseConnection:
     """Context manager for database connections."""
     def __init__(self):
         self.connection = None
-        
+
     def __enter__(self):
         """Get database connection."""
         connection_params = {
@@ -35,7 +35,7 @@ class DatabaseConnection:
         except Exception as e:
             logger.error(f"Database connection error: {str(e)}")
             return None
-            
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Close database connection."""
         if self.connection:
@@ -46,11 +46,31 @@ class DatabaseConnection:
                 self.connection = None
             except Exception as e:
                 logger.error(f"Error closing connection: {str(e)}")
-            
-def get_db_connection():
-    """Get database connection using context manager."""
-    return DatabaseConnection().__enter__()
 
-def close_db_connection(connection):
-    if connection:
-        connection.close()
+def get_db_connection(dbname=None):
+    try:
+        conn = psycopg.connect(
+            host=os.getenv("POSTGRES_HOST"),
+            port=os.getenv("POSTGRES_PORT"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            dbname=dbname or os.getenv("POSTGRES_DB")
+        )
+        return conn
+    except Exception as e:
+        logger.error(f"Failed to connect to database: {str(e)}")
+        raise
+
+# database/setup_main_db.py
+
+from database.db_connection import get_db_connection
+
+def setup_database():
+    connection = get_db_connection(dbname=ADMIN_DB_CONFIG["dbname"])
+    cursor = connection.cursor()
+    # Your database setup code here
+    connection.commit()
+    connection.close()
+
+if __name__ == "__main__":
+    setup_database()

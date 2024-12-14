@@ -1,0 +1,44 @@
+[MASTER]
+# Python files to analyze
+init-hook='import sys; sys.path.append(".")'
+ignore=CVS,venv,__pycache__
+persistent=yes
+
+# Maximum recursion depth for analyzing imports
+recursive=yes
+
+[MESSAGES CONTROL]
+# Disable specific warnings
+disable=
+    C0111,  # missing-docstring
+    C0103,  # invalid-name
+    C0301,  # line-too-long
+    C0303,  # trailing-whitespace
+    C0304,  # missing-final-newline
+    C0328,  # unexpected-line-ending-format
+    R0903,  # too-few-public-methods
+    W0611,  # unused-import
+    C0411   # wrong-import-order
+
+[FORMAT]
+# Allow longer lines
+max-line-length=120
+
+# Standardize line endings
+expected-line-ending-format=LF
+
+[BASIC]
+# Regular expression which should only match function or class names
+function-rgx=[a-z_][a-z0-9_]{2,50}$
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+
+[TYPECHECK]
+# List of module names for which member attributes should not be checked
+ignored-modules=numpy,torch,tensorflow
+
+[REPORTS]
+# Set the output format
+output-format=text
+
+# Include a brief explanation of each error
+msg-template={path}:{line}: [{msg_id}({symbol}), {obj}] {msg}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.pylint]
+max-line-length = 120
+disable = ["C0111", "C0103", "C0301"]

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Article Analysis Dashboard</title>
+    <style>
+        .report-container {
+            margin: 20px;
+            padding: 20px;
+        }
+        .report-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Article Analysis Dashboard</h1>
+    <div class="report-container">
+        {% for title, filename in reports.items() %}
+        <h2>{{ title }}</h2>
+        <iframe class="report-frame" src="{{ url_for('static', filename='reports/' + filename) }}"></iframe>
+        {% endfor %}
+    </div>
+</body>
+</html>
