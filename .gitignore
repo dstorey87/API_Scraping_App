@@ -5,6 +5,7 @@ __pycache__/
 
 # Environment variables
 .env
+.env.local
 
 # Logs
 logs/
@@ -83,6 +84,8 @@ target/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.swp
+*.swo
 
 # MacOS
 .DS_Store
@@ -93,3 +96,16 @@ test_model_cache/
 .pytest_cache/
 /test_model_cache
 /test_cache/
+models/
+*.bin
+*.pt
+*.pth
+
+# Python virtual environment
+venv/
+env/
+.env/
+
+# Database
+*.sqlite
+*.db
