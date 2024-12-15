@@ -1,56 +1,66 @@
-from dataclasses import dataclass, field
+# ./config/model_config.py
+
+from dataclasses import dataclass
 from typing import Dict, Optional
 import os
 
 @dataclass
-class CacheConfig:
-    cache_dir: str = "model_cache"
-    max_cache_size: int = 100  # GB
-    keep_in_memory: bool = False
-
 class ModelConfig:
-    def __init__(
-        self,
-        name: str,
-        model_type: str = "",
-        quantization: bool = False,
-        description: str = "",
-        max_memory: Dict[int, str] = None,
-    ):
-        self.name = name
-        self.model_type = model_type
-        self.quantization = quantization
-        self.description = description
-        self.max_memory = max_memory or {0: "10GB"}
-
-# Existing predefined configurations
-vision_model_config = ModelConfig(
-    name="unsloth/Llama-3.2-11B-Vision-Instruct",
-    model_type="vision",
-    quantization=True,
-    description="Vision model with dynamic quantization",
-)
-
-text_model_config = ModelConfig(
-    name="gpt2",
-    model_type="text",
-    quantization=True,
-    description="Text model with dynamic quantization",
-)
+    """Configuration for LLM models."""
+    name: str
+    max_memory: Dict[int, str]
+    model_type: str = "text"
+    use_4bit: bool = True
+    description: Optional[str] = None
+    temperature: float = 0.7
+    max_tokens: int = 2048
+    top_p: float = 0.95
+    frequency_penalty: float = 0.0
+    presence_penalty: float = 0.0
+    auth_token: Optional[str] = None  # Add this line
 
 MODEL_CONFIGS = {
-    # Vision Processing
-    "vision": ModelConfig(
-        name="unsloth/Llama-3.2-11B-Vision-Instruct-bnb-4bit",
-        max_memory={0: "6GB"},
-        model_type="vision",
-        description="4-bit quantized Llama 3.2 vision model"
-    ),
-    # Text Processing
     "text": ModelConfig(
-        name="mistralai/Mistral-Large-Instruct-2411",
+        name="HuggingFaceH4/zephyr-7b-beta",  # Change to an open-access model
         max_memory={0: "6GB"},
         model_type="text",
-        description="Latest Mistral Large model with multilingual support"
+        use_4bit=True,
+        description="Zephyr 7B model for text generation",
+        temperature=0.7,
+        max_tokens=2048
     )
+}
+
+# Default configurations for different model types
+DEFAULT_CONFIGS = {
+    "text": {
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 0.95,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+    },
+    "code": {
+        "temperature": 0.2,
+        "max_tokens": 4096,
+        "top_p": 0.99,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0
+    },
+    "chat": {
+        "temperature": 0.9,
+        "max_tokens": 2048,
+        "top_p": 0.95,
+        "frequency_penalty": 0.3,
+        "presence_penalty": 0.6
+    }
+}
+
+# Model requirements for CUDA compatibility
+CUDA_REQUIREMENTS = {
+    "min_vram": "6GB",
+    "recommended_vram": "8GB",
+    "cuda_version": "11.8",
+    "torch_version": "2.1.0",
+    "cudnn_version": "8.9.2"
 }

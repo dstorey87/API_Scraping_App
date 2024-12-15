@@ -33,11 +33,15 @@ class NewsServices:
 
 def initialize_services() -> NewsServices:
     """Initialize all required services."""
+    logger.info("Initializing LLM service with performance monitoring...")
+    llm_service = LocalLLMService(MODEL_CONFIGS["text"])
+    if not llm_service.health_check():
+        raise RuntimeError("Failed to initialize LLM service")
     return NewsServices(
         guardian=GuardianService(),
         news_api=NewsAPIService(),
         reddit=RedditService(),
-        analytics=AnalyticsService(),
+        analytics=AnalyticsService(llm_service),
         visualization=VisualizationService()
     )
 

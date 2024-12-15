@@ -102,9 +102,6 @@ models/
 *.pth
 
 # Python virtual environment
-venv/
-env/
-.env/
 
 # Database
 *.sqlite
