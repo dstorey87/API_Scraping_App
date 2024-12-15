@@ -17,6 +17,8 @@ models/
 
 # IDE
 .vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
 .idea/
 
 # Logs

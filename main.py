@@ -2,11 +2,11 @@
 
 import logging
 import os
-import time
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 from flask import Flask
-
+from langchain_service.models.base_model import LocalLLMService  # Updated import
+from config.model_config import MODEL_CONFIGS
 from services.guardian_service import GuardianService
 from services.news_api_service import NewsAPIService
 from services.reddit_service import RedditService
